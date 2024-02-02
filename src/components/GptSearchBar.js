@@ -1,13 +1,14 @@
 import React, { useRef } from "react";
 import lang from "../utils/languageConstants";
 import { useDispatch, useSelector } from "react-redux";
-import openai from "../utils/openAI";
+import OpenAI from "openai";
 import { API_OPTIONS } from "../utils/constants";
 import { addGptMovieResult } from "../utils/gptSlice";
 
 const GptSearchBar = () => {
   const dispatch = useDispatch();
-  const langKey = useSelector((store) => store.config.lang);
+  const langKey = useSelector((store) => store.config?.lang);
+  const gptKey = useSelector((store) => store.gpt?.gptKey);
   const searchText = useRef(null);
 
   const searchMovieTMDB = async (movie) => {
@@ -28,7 +29,12 @@ const GptSearchBar = () => {
       searchText.current.value +
       ". only give me names of 5 movies, comma seperated like the example result given ahead. Example Result: KGF, Salaar, Pushpa, Suits, Merry christmas";
 
-    const gptResults = await openai.chat.completions.create({
+      const openai = new OpenAI({
+        apiKey: gptKey, // This is the default and can be omitted
+        dangerouslyAllowBrowser: true,
+      });
+    
+      const gptResults = await openai.chat.completions.create({
       messages: [{ role: "user", content: gptQuery }],
       model: "gpt-3.5-turbo",
     });
@@ -47,7 +53,7 @@ const GptSearchBar = () => {
   };
 
   return (
-    <div className="pt-[10%] flex justify-center">
+    <div className="pt-[2%] flex justify-center">
       <form
         className=" w-1/2 bg-black grid grid-cols-12"
         onSubmit={(e) => e.preventDefault()}
@@ -57,6 +63,7 @@ const GptSearchBar = () => {
           type="text"
           className=" p-4 m-4 col-span-9"
           placeholder={lang[langKey].gptSearchPlaceholder}
+          disabled={!gptKey}
         />
         <button
           className="col-span-3 m-4 py-2 px-4 bg-red-700 text-white rounded-lg"

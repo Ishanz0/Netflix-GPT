@@ -5,7 +5,11 @@ import { useNavigate } from "react-router-dom";
 import { auth } from "../utils/firebase";
 import { addUser, removeUser } from "../utils/userSlice";
 import { LOGO, SUPPORTED_LANGUAGES, USER_ICON } from "../utils/constants";
-import { toggleGptSearchView } from "../utils/gptSlice";
+import {
+  removeGptKey,
+  removeGptMovieResult,
+  toggleGptSearchView,
+} from "../utils/gptSlice";
 import { changeLanguage } from "../utils/configSlice";
 
 const Header = () => {
@@ -43,6 +47,13 @@ const Header = () => {
     // Unsiubscribe when component unmounts
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (!showGptSearch) {
+      dispatch(removeGptKey());
+      dispatch(removeGptMovieResult());
+    }
+  }, [showGptSearch]);
 
   const handleGptSearch = () => {
     dispatch(toggleGptSearchView());
